@@ -163,7 +163,7 @@ def render_gnb():
 def render_page_title():
     st.markdown("""
     <div class="main-wrap">
-    <h1 class="page-title">공사감리용역 실적 계산</h1>
+    <h1 class="page-title">주택건설공사 감리영역 실적(연면적)계산</h1>
     <p class="page-desc">수행현황확인서 PDF를 업로드하면 입찰 기준(360,000 ㎡)에 따른 실적 면적을 자동 산출합니다.</p>
     """, unsafe_allow_html=True)
 
@@ -201,7 +201,7 @@ def render_verdict(verdict: dict, total_area: float):
     is_pass = verdict["pass"]
     cls     = "pass" if is_pass else "fail"
     icon    = "✅" if is_pass else "❌"
-    title   = "기준 충족" if is_pass else "기준 미달"
+    title   = "입찰 참여 가능" if is_pass else "입찰 참여 불가능"
     title_cls = "verdict-title-pass" if is_pass else "verdict-title-fail"
     prog_cls  = "prog-pass" if is_pass else "prog-fail"
 
