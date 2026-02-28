@@ -52,11 +52,80 @@ def inject_css():
     .page-title { font-size: 1.5rem; font-weight: 700; color: #111827; letter-spacing: -0.03em; margin: 0 0 0.25rem 0; }
     .page-desc  { font-size: 0.85rem; color: #6b7280; margin: 0 0 2rem 0; }
 
-    /* 모드 선택 탭 */
-    [data-testid="stTabs"] button {
-        font-family: 'Noto Sans KR', sans-serif !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
+    /* ── 홈 화면 ── */
+    .home-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 60px);
+        padding: 3rem;
+    }
+    .home-hero {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .home-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    .home-title {
+        font-size: 2rem; font-weight: 700; color: #111827;
+        letter-spacing: -0.04em; margin: 0 0 0.6rem 0;
+    }
+    .home-title span { color: #1a56db; }
+    .home-desc {
+        font-size: 0.95rem; color: #6b7280;
+        line-height: 1.7; margin: 0;
+    }
+    .home-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        width: 100%;
+        max-width: 640px;
+    }
+    .home-card {
+        background: #ffffff;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 2rem 1.75rem;
+        cursor: pointer;
+        transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+        text-align: left;
+    }
+    .home-card:hover {
+        border-color: #1a56db;
+        box-shadow: 0 4px 20px rgba(26,86,219,0.12);
+        transform: translateY(-2px);
+    }
+    .home-card-icon {
+        font-size: 2rem; margin-bottom: 1rem; display: block;
+    }
+    .home-card-title {
+        font-size: 1.05rem; font-weight: 700; color: #111827;
+        margin: 0 0 0.4rem 0;
+    }
+    .home-card-desc {
+        font-size: 0.8rem; color: #9ca3af; line-height: 1.5; margin: 0;
+    }
+    .home-card-formula {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.72rem; color: #6366f1;
+        background: #f5f3ff; border-radius: 6px;
+        padding: 6px 10px; margin-top: 0.75rem;
+        display: inline-block;
+    }
+    .home-footer {
+        margin-top: 2rem;
+        font-size: 0.78rem; color: #d1d5db; text-align: center;
+    }
+
+    /* ── 뒤로가기 버튼 ── */
+    .back-btn-wrap {
+        display: flex; align-items: center; gap: 0.5rem;
+        margin-bottom: 1.5rem;
     }
 
     /* 입력 패널 */
@@ -186,8 +255,11 @@ def inject_css():
     """, unsafe_allow_html=True)
 
 
-def render_gnb(mode_label: str):
-    """상단 네비게이션 바"""
+def render_gnb(mode_label: str, show_back: bool = False):
+    """
+    상단 네비게이션 바
+    show_back=True 이면 홈으로 돌아가는 버튼 표시
+    """
     st.markdown(f"""
     <div class="gnb">
         <div class="gnb-logo">
@@ -197,6 +269,62 @@ def render_gnb(mode_label: str):
         <span class="gnb-tag">{mode_label}</span>
     </div>
     """, unsafe_allow_html=True)
+
+    if show_back:
+        if st.button("← 홈으로", key="back_btn"):
+            st.session_state["page"] = "home"
+            st.rerun()
+
+
+def render_home():
+    """홈 화면: 타이틀 + 모드 선택 카드 2개"""
+    st.markdown("""
+    <div class="home-wrap">
+        <div class="home-hero">
+            <span class="home-icon">🏗️</span>
+            <h1 class="home-title">공사감리용역<br><span>실적 계산기</span></h1>
+            <p class="home-desc">
+                수행현황확인서 PDF를 업로드하면<br>
+                입찰 기준 실적을 자동으로 산출합니다
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 카드 2개를 컬럼으로 배치
+    _, col_area, col_fee, _ = st.columns([1, 2, 2, 1], gap="medium")
+
+    with col_area:
+        st.markdown("""
+        <div class="home-card">
+            <span class="home-card-icon">📐</span>
+            <p class="home-card-title">연면적 계산</p>
+            <p class="home-card-desc">감리 실적의 연면적 합계를 산출하여 기준 충족 여부를 판정합니다</p>
+            <span class="home-card-formula">연면적 × 이행비율 × W</span>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("연면적 계산 시작  →", key="go_area", use_container_width=True):
+            st.session_state["page"] = "area"
+            st.rerun()
+
+    with col_fee:
+        st.markdown("""
+        <div class="home-card">
+            <span class="home-card-icon">💰</span>
+            <p class="home-card-title">용역비 계산</p>
+            <p class="home-card-desc">감리 실적의 용역비 합계를 산출하여 기준 충족 여부를 판정합니다</p>
+            <span class="home-card-formula">용역비 × W</span>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("용역비 계산 시작  →", key="go_fee", use_container_width=True):
+            st.session_state["page"] = "fee"
+            st.rerun()
+
+    st.markdown(
+        '<p class="home-footer" style="text-align:center;margin-top:2rem;font-size:0.78rem;color:#d1d5db">'
+        '전력기술관리법 기준 · 입찰 공고일 기준 3년 실적 산출</p>',
+        unsafe_allow_html=True
+    )
 
 
 def render_page_title(title: str, desc: str):

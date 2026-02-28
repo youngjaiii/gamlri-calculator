@@ -1,8 +1,11 @@
 """
 app.py
-메인 진입점
-- 탭으로 '연면적 계산' / '용역비 계산' 모드 선택
-- 화면 흐름 제어만 담당, 로직은 각 모듈에 위임
+메인 진입점 — session_state로 화면 전환 관리
+
+화면 구조:
+    home  → 홈 화면 (모드 선택 카드)
+    area  → 연면적 계산 화면
+    fee   → 용역비 계산 화면
 """
 import streamlit as st
 import pandas as pd
@@ -10,9 +13,18 @@ from datetime import date
 
 from parser import extract_records
 from calculator import get_base_period, calculate_area, calculate_fee
-from ui import (inject_css, render_gnb, render_page_title, render_range_chip,
-                render_kpi_grid, render_verdict, render_section_label)
+from ui import (
+    inject_css,
+    render_gnb,
+    render_home,
+    render_page_title,
+    render_range_chip,
+    render_kpi_grid,
+    render_verdict,
+    render_section_label,
+)
 
+# ── 페이지 설정 ──────────────────────────────────────────────
 st.set_page_config(
     page_title="감리실적 계산기",
     page_icon="🏗️",
@@ -22,22 +34,25 @@ st.set_page_config(
 
 inject_css()
 
-# ── 탭으로 모드 선택 ─────────────────────────────────────────
-tab_area, tab_fee = st.tabs(["📐 연면적 계산", "💰 용역비 계산"])
+# ── 화면 상태 초기화 ─────────────────────────────────────────
+# session_state["page"] 값에 따라 어떤 화면을 보여줄지 결정
+# "home" → 홈 화면 / "area" → 연면적 / "fee" → 용역비
+if "page" not in st.session_state:
+    st.session_state["page"] = "home"
 
 
 # ══════════════════════════════════════════════════════════════
-# 공통 입력 렌더링 함수
+# 공통: 입력 패널
 # ══════════════════════════════════════════════════════════════
 def render_input_panel(mode: str) -> tuple:
     """
-    공통 입력 패널 렌더링
+    공통 입력 패널
     mode: "area" | "fee"
     Returns: (bid_date, goal, uploaded_file, calc_btn)
     """
-    goal_label = "목표 연면적 (㎡)" if mode == "area" else "목표 용역비 (천원)"
-    goal_default = 360_000.0 if mode == "area" else 0.0
-    goal_help = "기준 충족 여부 판단에 사용됩니다 (기본값 360,000 ㎡)" if mode == "area" else "목표 용역비를 천원 단위로 입력하세요"
+    goal_label   = "목표 연면적 (㎡)"   if mode == "area" else "목표 용역비 (천원)"
+    goal_default = 360_000.0            if mode == "area" else 0.0
+    goal_help    = "기준 충족 판단에 사용 (기본값 360,000 ㎡)" if mode == "area" else "목표 용역비를 천원 단위로 입력"
 
     st.markdown('<div class="input-panel"><div class="panel-label">입력 정보</div>', unsafe_allow_html=True)
 
@@ -48,7 +63,7 @@ def render_input_panel(mode: str) -> tuple:
             "입찰 공고일",
             value=date.today(),
             format="YYYY.MM.DD",
-            key=f"bid_date_{mode}",
+            key=f"bid_{mode}",
         )
         d_start, d_end = get_base_period(bid_date)
         render_range_chip(d_start, d_end)
@@ -68,7 +83,7 @@ def render_input_panel(mode: str) -> tuple:
         uploaded_file = st.file_uploader(
             "공사감리용역수행현황확인서 PDF",
             type=["pdf"],
-            help="전력기술인단체에서 발급받은 확인서 PDF를 업로드하세요",
+            help="전력기술인단체에서 발급받은 확인서 PDF",
             key=f"upload_{mode}",
         )
 
@@ -78,7 +93,7 @@ def render_input_panel(mode: str) -> tuple:
             "계산 시작  →",
             type="primary",
             use_container_width=True,
-            key=f"btn_{mode}",
+            key=f"calc_{mode}",
         )
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -86,24 +101,15 @@ def render_input_panel(mode: str) -> tuple:
 
 
 # ══════════════════════════════════════════════════════════════
-# 공통 결과 렌더링 함수
+# 공통: 결과 렌더링
 # ══════════════════════════════════════════════════════════════
 def render_results(records, result_rows, total_value, verdict, unit: str, value_col: str):
-    """
-    KPI · 판정 · 상세 테이블 렌더링
-    unit      : 단위 표시 문자열 (예: "㎡", "천원")
-    value_col : 테이블의 환산값 컬럼명
-    """
-    if warnings := st.session_state.get("warnings", []):
-        with st.expander(f"파싱 경고 {len(warnings)}건"):
-            for w in warnings:
-                st.caption(w)
+    """KPI · 판정 · 상세 테이블 렌더링"""
 
     if not records:
         st.error("유효한 데이터를 찾지 못했습니다. PDF 표 구조를 확인해 주세요.")
         return
 
-    # 요약 KPI
     render_section_label("요약 통계")
     render_kpi_grid(
         total_records=len(records),
@@ -114,18 +120,14 @@ def render_results(records, result_rows, total_value, verdict, unit: str, value_
         is_pass=verdict["pass"],
     )
 
-    # 판정 결과
     render_section_label("최종 판정")
     render_verdict(verdict, total_value, unit)
     if verdict["pass"]:
         st.balloons()
 
-    # 상세 테이블
     if result_rows:
         render_section_label("상세 계산 결과")
         df = pd.DataFrame(result_rows)
-
-        # 환산값 컬럼 숫자 포맷 설정
         col_cfg = {
             "용역명":      st.column_config.TextColumn("용역명",      width="large"),
             "분야":        st.column_config.TextColumn("분야",        width="small"),
@@ -139,10 +141,20 @@ def render_results(records, result_rows, total_value, verdict, unit: str, value_
 
 
 # ══════════════════════════════════════════════════════════════
-# 탭 1: 연면적 계산
+# 화면 전환 라우터
 # ══════════════════════════════════════════════════════════════
-with tab_area:
-    render_gnb("연면적 계산 모드")
+page = st.session_state["page"]
+
+# ── 홈 화면 ─────────────────────────────────────────────────
+if page == "home":
+    render_gnb("메인 메뉴", show_back=False)
+    st.markdown('<div class="main-wrap">', unsafe_allow_html=True)
+    render_home()
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ── 연면적 계산 화면 ─────────────────────────────────────────
+elif page == "area":
+    render_gnb("연면적 계산 모드", show_back=True)
     st.markdown('<div class="main-wrap">', unsafe_allow_html=True)
     render_page_title(
         "연면적 실적 계산",
@@ -157,32 +169,25 @@ with tab_area:
         else:
             with st.spinner("PDF 분석 중..."):
                 records, warnings = extract_records(uploaded_file)
-                st.session_state["warnings"] = warnings
+
+            if warnings:
+                with st.expander(f"파싱 경고 {len(warnings)}건"):
+                    for w in warnings:
+                        st.caption(w)
 
             d_start, d_end = get_base_period(bid_date)
             result_rows, total, verdict = calculate_area(records, d_start, d_end, goal)
-
-            render_results(
-                records=records,
-                result_rows=result_rows,
-                total_value=total,
-                verdict=verdict,
-                unit="㎡",
-                value_col="환산면적(㎡)",
-            )
+            render_results(records, result_rows, total, verdict, "㎡", "환산면적(㎡)")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-
-# ══════════════════════════════════════════════════════════════
-# 탭 2: 용역비 계산
-# ══════════════════════════════════════════════════════════════
-with tab_fee:
-    render_gnb("용역비 계산 모드")
+# ── 용역비 계산 화면 ─────────────────────────────────────────
+elif page == "fee":
+    render_gnb("용역비 계산 모드", show_back=True)
     st.markdown('<div class="main-wrap">', unsafe_allow_html=True)
     render_page_title(
         "용역비 실적 계산",
-        "환산용역비 = 용역비 × (중첩일수 / 전체감리일수)"
+        "환산용역비 = 용역비 × (중첩일수 / 전체감리일수)  ※ 용역비는 이행비율 반영 완료"
     )
 
     bid_date, goal, uploaded_file, calc_btn = render_input_panel("fee")
@@ -193,18 +198,14 @@ with tab_fee:
         else:
             with st.spinner("PDF 분석 중..."):
                 records, warnings = extract_records(uploaded_file)
-                st.session_state["warnings"] = warnings
+
+            if warnings:
+                with st.expander(f"파싱 경고 {len(warnings)}건"):
+                    for w in warnings:
+                        st.caption(w)
 
             d_start, d_end = get_base_period(bid_date)
             result_rows, total, verdict = calculate_fee(records, d_start, d_end, goal)
-
-            render_results(
-                records=records,
-                result_rows=result_rows,
-                total_value=total,
-                verdict=verdict,
-                unit="천원",
-                value_col="환산용역비(천원)",
-            )
+            render_results(records, result_rows, total, verdict, "천원", "환산용역비(천원)")
 
     st.markdown("</div>", unsafe_allow_html=True)
