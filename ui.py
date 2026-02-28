@@ -52,18 +52,18 @@ def inject_css():
     .page-title { font-size: 1.5rem; font-weight: 700; color: #111827; letter-spacing: -0.03em; margin: 0 0 0.25rem 0; }
     .page-desc  { font-size: 0.85rem; color: #6b7280; margin: 0 0 2rem 0; }
 
-    /* ── 홈 화면 ── */
+    /* ── 홈 화면 ── (수정본) */
     .home-wrap {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        min-height: calc(100vh - 60px);
-        padding: 3rem;
+        justify-content: flex-start; /* 중앙이 아닌 위쪽부터 배치 */
+        min-height: auto;           /* 높이 제한 해제 */
+        padding: 4rem 3rem 1rem 3rem; /* 상단 여백은 유지, 하단 여백 대폭 축소 */
     }
     .home-hero {
         text-align: center;
-        margin-bottom: 3rem;
+        margin-bottom: 2rem; /* 기존 3rem에서 2rem으로 축소 */
     }
     .home-icon {
         font-size: 3.5rem;
