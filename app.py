@@ -182,7 +182,7 @@ with tab_fee:
     st.markdown('<div class="main-wrap">', unsafe_allow_html=True)
     render_page_title(
         "용역비 실적 계산",
-        "환산용역비 = 용역비 × (중첩일수 / 전체감리일수)  ※ 용역비는 이행비율 반영 완료"
+        "환산용역비 = 용역비 × (중첩일수 / 전체감리일수)"
     )
 
     bid_date, goal, uploaded_file, calc_btn = render_input_panel("fee")
