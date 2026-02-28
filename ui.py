@@ -1,9 +1,8 @@
 """
 ui.py
-Streamlit CSS 주입 및 UI 컴포넌트 모음
+CSS 주입 및 재사용 UI 컴포넌트 모음
 """
 import streamlit as st
-from calculator import AREA_THRESHOLD
 
 
 def inject_css():
@@ -24,6 +23,7 @@ def inject_css():
     [data-testid="stToolbar"] { display: none !important; }
     .block-container          { padding: 0 !important; max-width: 100% !important; }
 
+    /* GNB */
     .gnb {
         background: #ffffff;
         border-bottom: 1px solid #e8eaed;
@@ -47,13 +47,25 @@ def inject_css():
         background: #f3f4f6; border-radius: 4px; padding: 2px 8px;
     }
 
+    /* 메인 래퍼 */
     .main-wrap  { padding: 2rem 3rem; max-width: 1280px; margin: 0 auto; }
     .page-title { font-size: 1.5rem; font-weight: 700; color: #111827; letter-spacing: -0.03em; margin: 0 0 0.25rem 0; }
     .page-desc  { font-size: 0.85rem; color: #6b7280; margin: 0 0 2rem 0; }
 
+    /* 모드 선택 탭 */
+    [data-testid="stTabs"] button {
+        font-family: 'Noto Sans KR', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* 입력 패널 */
     .input-panel {
-        background: #ffffff; border: 1px solid #e5e7eb;
-        border-radius: 12px; padding: 1.75rem 2rem; margin-bottom: 1.5rem;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.75rem 2rem;
+        margin-bottom: 1.5rem;
     }
     .panel-label {
         font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
@@ -64,9 +76,16 @@ def inject_css():
         background: #eff6ff; border: 1px solid #bfdbfe;
         border-radius: 8px; padding: 8px 14px; margin-top: 0.6rem;
     }
-    .range-chip-label { font-size: 0.72rem; font-weight: 600; color: #2563eb; text-transform: uppercase; letter-spacing: 0.06em; }
-    .range-chip-value { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; font-weight: 500; color: #1e40af; }
+    .range-chip-label {
+        font-size: 0.72rem; font-weight: 600; color: #2563eb;
+        text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .range-chip-value {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.85rem; font-weight: 500; color: #1e40af;
+    }
 
+    /* 버튼 */
     .stButton > button {
         background: #1a56db !important; color: #ffffff !important;
         border: none !important; border-radius: 8px !important;
@@ -77,7 +96,13 @@ def inject_css():
     }
     .stButton > button:hover { background: #1648c0 !important; }
 
-    .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    /* KPI 카드 그리드 */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
     .kpi-card {
         background: #ffffff; border: 1px solid #e5e7eb;
         border-radius: 10px; padding: 1.25rem 1.5rem;
@@ -88,11 +113,18 @@ def inject_css():
     .kpi-card.amber  { border-top-color: #f59e0b; }
     .kpi-card.green  { border-top-color: #10b981; }
     .kpi-card.red    { border-top-color: #ef4444; }
-    .kpi-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #9ca3af; margin-bottom: 0.5rem; }
-    .kpi-value { font-family: 'IBM Plex Mono', monospace; font-size: 1.65rem; font-weight: 600; color: #111827; line-height: 1.1; }
-    .kpi-unit  { font-size: 0.85rem; color: #9ca3af; margin-left: 2px; }
-    .kpi-sub   { font-size: 0.75rem; color: #d1d5db; margin-top: 0.3rem; }
+    .kpi-label {
+        font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+        text-transform: uppercase; color: #9ca3af; margin-bottom: 0.5rem;
+    }
+    .kpi-value {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 1.5rem; font-weight: 600; color: #111827; line-height: 1.1;
+    }
+    .kpi-unit { font-size: 0.85rem; color: #9ca3af; margin-left: 2px; }
+    .kpi-sub  { font-size: 0.75rem; color: #d1d5db; margin-top: 0.3rem; }
 
+    /* 판정 박스 */
     .verdict-box {
         border-radius: 12px; padding: 2rem 2.5rem;
         display: flex; align-items: center; gap: 2rem; margin-bottom: 1.5rem;
@@ -111,7 +143,10 @@ def inject_css():
     .verdict-detail { font-size: 0.88rem; color: #6b7280; margin: 0; line-height: 1.8; }
     .verdict-detail strong { color: #374151; }
     .verdict-meter { width: 130px; flex-shrink: 0; text-align: center; }
-    .verdict-pct   { font-family: 'IBM Plex Mono', monospace; font-size: 2.2rem; font-weight: 600; line-height: 1; }
+    .verdict-pct   {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 2.2rem; font-weight: 600; line-height: 1;
+    }
     .verdict-pct.pass { color: #16a34a; }
     .verdict-pct.fail { color: #dc2626; }
     .verdict-pct-lbl  { font-size: 0.72rem; color: #9ca3af; margin-top: 4px; }
@@ -119,6 +154,7 @@ def inject_css():
     .prog-pass { height: 100%; border-radius: 99px; background: #22c55e; }
     .prog-fail { height: 100%; border-radius: 99px; background: #ef4444; }
 
+    /* 섹션 레이블 */
     .sec-label {
         font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
         text-transform: uppercase; color: #6b7280;
@@ -126,6 +162,7 @@ def inject_css():
         padding-bottom: 0.6rem; margin-bottom: 1rem;
     }
 
+    /* Streamlit 위젯 오버라이드 */
     [data-testid="stFileUploader"] {
         border: 1.5px dashed #d1d5db !important;
         border-radius: 8px !important; background: #f9fafb !important;
@@ -136,7 +173,8 @@ def inject_css():
     label, [data-testid="stWidgetLabel"] p {
         color: #374151 !important; font-size: 0.82rem !important; font-weight: 500 !important;
     }
-    [data-testid="stDateInput"] input {
+    [data-testid="stDateInput"] input,
+    [data-testid="stNumberInput"] input {
         border-radius: 8px !important; border-color: #d1d5db !important;
         font-family: 'IBM Plex Mono', monospace !important;
         font-size: 0.9rem !important; color: #111827 !important; background: #ffffff !important;
@@ -148,27 +186,40 @@ def inject_css():
     """, unsafe_allow_html=True)
 
 
-def render_gnb():
-    st.markdown("""
+def render_gnb(mode_label: str):
+    """상단 네비게이션 바"""
+    st.markdown(f"""
     <div class="gnb">
         <div class="gnb-logo">
             <div class="gnb-logo-icon">🏗</div>
             감리실적 계산기
         </div>
-        <span class="gnb-tag">전력기술관리법 기준</span>
+        <span class="gnb-tag">{mode_label}</span>
     </div>
     """, unsafe_allow_html=True)
 
 
-def render_page_title():
-    st.markdown("""
-    <div class="main-wrap">
-    <h1 class="page-title">주택건설공사 감리영역 실적(연면적)계산</h1>
-    <p class="page-desc">수행현황확인서 PDF를 업로드하면 입찰 기준(360,000 ㎡)에 따른 실적 면적을 자동 산출합니다.</p>
+def render_page_title(title: str, desc: str):
+    """페이지 타이틀 + 설명"""
+    st.markdown(f"""
+    <h1 class="page-title">{title}</h1>
+    <p class="page-desc">{desc}</p>
     """, unsafe_allow_html=True)
 
 
-def render_kpi_cards(total_records: int, valid_count: int, field_count: int, total_area: float, is_pass: bool):
+def render_range_chip(d_start, d_end):
+    """실적 기준 기간 칩"""
+    st.markdown(f"""
+    <div class="range-chip">
+        <span class="range-chip-label">실적 기준 기간</span>
+        <span class="range-chip-value">{d_start.strftime('%Y.%m.%d')} ~ {d_end.strftime('%Y.%m.%d')}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def render_kpi_grid(total_records: int, valid_count: int, field_count: int,
+                    total_value: float, unit: str, is_pass: bool):
+    """요약 통계 KPI 카드 4개"""
     area_color = "green" if is_pass else "red"
     st.markdown(f"""
     <div class="kpi-grid">
@@ -188,27 +239,33 @@ def render_kpi_cards(total_records: int, valid_count: int, field_count: int, tot
             <div class="kpi-sub">중복 제거</div>
         </div>
         <div class="kpi-card {area_color}">
-            <div class="kpi-label">합계 면적</div>
-            <div class="kpi-value">{total_area:,.0f}<span class="kpi-unit">㎡</span></div>
-            <div class="kpi-sub">기준 {AREA_THRESHOLD:,} ㎡</div>
+            <div class="kpi-label">합계</div>
+            <div class="kpi-value">{total_value:,.0f}<span class="kpi-unit">{unit}</span></div>
+            <div class="kpi-sub">환산 합계</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 
-def render_verdict(verdict: dict, total_area: float):
-    pct     = verdict["pct"]
-    is_pass = verdict["pass"]
-    cls     = "pass" if is_pass else "fail"
-    icon    = "✅" if is_pass else "❌"
-    title   = "입찰 참여 가능" if is_pass else "입찰 참여 불가능"
+def render_verdict(verdict: dict, total_value: float, unit: str):
+    """판정 결과 박스"""
+    is_pass  = verdict["pass"]
+    pct      = verdict["pct"]
+    goal     = verdict["goal"]
+    cls      = "pass" if is_pass else "fail"
+    icon     = "✅" if is_pass else "❌"
+    title    = "기준 충족 (PASS)" if is_pass else "기준 미달 (FAIL)"
     title_cls = "verdict-title-pass" if is_pass else "verdict-title-fail"
     prog_cls  = "prog-pass" if is_pass else "prog-fail"
 
     if is_pass:
-        detail = f"합계 <strong>{total_area:,.2f} ㎡</strong> ≥ 기준 <strong>{AREA_THRESHOLD:,} ㎡</strong><br>초과 면적: <strong>+{verdict['surplus']:,.2f} ㎡</strong>"
+        detail = (f"합계 <strong>{total_value:,.2f} {unit}</strong> ≥ "
+                  f"목표 <strong>{goal:,.0f} {unit}</strong><br>"
+                  f"초과: <strong>+{verdict['surplus']:,.2f} {unit}</strong>")
     else:
-        detail = f"합계 <strong>{total_area:,.2f} ㎡</strong> &lt; 기준 <strong>{AREA_THRESHOLD:,} ㎡</strong><br>부족 면적: <strong>-{verdict['shortage']:,.2f} ㎡</strong>"
+        detail = (f"합계 <strong>{total_value:,.2f} {unit}</strong> &lt; "
+                  f"목표 <strong>{goal:,.0f} {unit}</strong><br>"
+                  f"부족: <strong>-{verdict['shortage']:,.2f} {unit}</strong>")
 
     st.markdown(f"""
     <div class="verdict-box {cls}">
@@ -220,11 +277,14 @@ def render_verdict(verdict: dict, total_area: float):
         <div class="verdict-meter">
             <div class="verdict-pct {cls}">{pct:.1f}<span style="font-size:1rem">%</span></div>
             <div class="verdict-pct-lbl">달성률</div>
-            <div class="prog-bg"><div class="{prog_cls}" style="width:{pct:.1f}%"></div></div>
+            <div class="prog-bg">
+                <div class="{prog_cls}" style="width:{pct:.1f}%"></div>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 
 def render_section_label(label: str):
+    """섹션 구분 레이블"""
     st.markdown(f'<div class="sec-label">{label}</div>', unsafe_allow_html=True)
